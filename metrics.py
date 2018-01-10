@@ -3,6 +3,7 @@ import configparser
 import logging
 from datetime import datetime
 from statistics import mean
+from collections import Counter
 
 import requests
 from requests.exceptions import RequestException
@@ -26,6 +27,8 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
         "fields": {
             }
     }
+
+    trip_updates_by_route = Counter()
 
     try:
         response = requests.get(feed_url, timeout=timeout)
@@ -60,6 +63,9 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
             if entity.HasField('trip_update'):
                 point['fields']['trip_update_count'] += 1
 
+                if entity.trip_update.HasField('trip') and entity.trip_update.trip.HasField('route_id'):
+                    trip_updates_by_route.update([entity.trip_update.trip.route_id])
+
             if entity.HasField('vehicle'):
                 point['fields']['vehicle_position_count'] += 1
 
@@ -85,9 +91,26 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
         logging.warning("Exception caught while fetching feed %s from %s:", feed_id, feed_url, exc_info=True)
         point['fields']['error'] = str(e)
 
+
+    route_points = [{
+                        "measurement": "route_fetch",
+                        "tags": {
+                            "agency_id": agency_id,
+                            "feed_id": feed_id,
+                            "feed_url": feed_url,
+                            "route_id": route_id
+                            },
+                        "time": now,
+                        "fields": {
+                            "trip_update_count": trip_update_count
+                            }
+                    }
+                    for (route_id, trip_update_count)
+                    in trip_updates_by_route.items()]
+
     client = InfluxDBClient(**influxdb_config)
-    
-    client.write_points([point], time_precision="s")
+
+    client.write_points([point] + route_points, time_precision="s")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Collect metrics from GTFS-rt feeds and log to InfluxDB")
