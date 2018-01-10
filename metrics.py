@@ -66,17 +66,17 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
                 if entity.trip_update.HasField('trip') and entity.trip_update.trip.HasField('route_id'):
                     trip_updates_by_route.update([entity.trip_update.trip.route_id])
 
+                if entity.trip_update.HasField('timestamp'):
+                    entity_timestamps.append(entity.trip_update.timestamp)
+
             if entity.HasField('vehicle'):
                 point['fields']['vehicle_position_count'] += 1
 
+                if entity.vehicle.HasField('timestamp'):
+                    entity_timestamps.append(entity.vehicle.timestamp)
+
             if entity.HasField('alert'):
                 point['fields']['alert_count'] += 1
-
-            if entity.HasField('trip_update') and entity.trip_update.HasField('timestamp'):
-                entity_timestamps.append(entity.trip_update.timestamp)
-
-            if entity.HasField('vehicle') and entity.vehicle.HasField('timestamp'):
-                entity_timestamps.append(entity.vehicle.timestamp)
 
         entity_timestamp_ages_ms = [(now - datetime.utcfromtimestamp(ts)).total_seconds() * 1000
                                     for ts
