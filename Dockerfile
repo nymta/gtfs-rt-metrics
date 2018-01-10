@@ -6,7 +6,7 @@ RUN apt-get -qy update && \
     mkdir /app && \
     virtualenv --python=python3 /app/env
 
-COPY metrics.py run.sh config.ini requirements.txt /app/
+COPY metrics.py run.sh requirements.txt /app/
 
 RUN /app/env/bin/pip install -r /app/requirements.txt && \
     chmod +x /app/run.sh && \
