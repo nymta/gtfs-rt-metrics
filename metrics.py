@@ -14,7 +14,7 @@ from influxdb import InfluxDBClient
 
 def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
     now = datetime.utcnow()
-    
+
     point = {
         "measurement": "feed_fetch",
         "tags": {
@@ -40,7 +40,7 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
             point['fields']['response_size_bytes'] = len(response.content)
 
         response.raise_for_status()
-        
+
         feed = gtfs_realtime_pb2.FeedMessage()
         feed.ParseFromString(response.content)
 
@@ -53,10 +53,10 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
             point['fields']['header_ts_age_ms'] = (now - datetime.utcfromtimestamp(feed.header.timestamp)).total_seconds() * 1000
 
         entity_timestamps = []
-        
+
         for entity in feed.entity:
             point['fields']['entity_count'] += 1
-            
+
             if entity.HasField('trip_update'):
                 point['fields']['trip_update_count'] += 1
 
@@ -68,7 +68,7 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
 
             if entity.HasField('trip_update') and entity.trip_update.HasField('timestamp'):
                 entity_timestamps.append(entity.trip_update.timestamp)
-                
+
             if entity.HasField('vehicle') and entity.vehicle.HasField('timestamp'):
                 entity_timestamps.append(entity.vehicle.timestamp)
 
@@ -80,7 +80,7 @@ def get(agency_id, feed_id, feed_url, influxdb_config, timeout):
             point['fields']['entity_timestamp_ages_min_ms'] = min(entity_timestamp_ages_ms)
             point['fields']['entity_timestamp_ages_max_ms'] = max(entity_timestamp_ages_ms)
             point['fields']['entity_timestamp_ages_avg_ms'] = mean(entity_timestamp_ages_ms)
-        
+
     except (RequestException, ProtobufError) as e:
         logging.warning("Exception caught while fetching feed %s from %s:", feed_id, feed_url, exc_info=True)
         point['fields']['error'] = str(e)
@@ -97,16 +97,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.basicConfig(level=getattr(logging, args.log))
-    
+
     config = configparser.ConfigParser()
     config.read_file(args.config_file)
-    
+
     scheduler = BlockingScheduler()
-        
+
     scheduler.add_listener(lambda event: logging.error("Exception in feed fetch:",
                                                        exc_info=event.exception),
                            EVENT_JOB_ERROR)
-    
+
     interval = int(config['interval']['interval'], 10)
     agency_ids = [key.split(':')[1] for key in config.keys() if key.startswith('agency:')]
 
@@ -120,5 +120,3 @@ if __name__ == "__main__":
                               id=agency_id + ":" + feed_id)
 
     scheduler.start()
-        
-
