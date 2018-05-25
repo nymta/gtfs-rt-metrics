@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  influxdb:
+    image: influxdb:1.3.1-alpine
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:5.1.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/config:/etc/grafana
+  
+  app:
+    build: .
+    depends_on:
+      - influxdb
+    volumes:
+      - ./config.ini:/app/config.ini:ro
+      
