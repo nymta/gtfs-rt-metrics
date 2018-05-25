@@ -1,7 +1,7 @@
 gtfs-rt-metrics
 ===============
 
-This is `gtfs-rt-metrics`, a project to collect metrics on [GTFS-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds and log them to an [InfluxDB](https://docs.influxdata.com/influxdb/v1.5/) time-series database, where they can be visualized with [Grafana](https://grafana.com/), [Chronograph](https://docs.influxdata.com/chronograf/v1.5/), or other tools.
+This is `gtfs-rt-metrics`, a project to collect metrics on [GTFS-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds and log them to an [InfluxDB](https://docs.influxdata.com/influxdb/v1.5/) time-series database, where they can be visualized with [Grafana](https://grafana.com/), [Chronograf](https://docs.influxdata.com/chronograf/v1.5/), or other tools.
 
 Deployment
 ----------
