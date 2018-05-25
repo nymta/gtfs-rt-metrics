@@ -6,7 +6,7 @@ This is `gtfs-rt-metrics`, a project to collect metrics on [GTFS-realtime](https
 Deployment
 ----------
 
-`gtfs-rt-metrics` is most easily deployed with Docker and Docker Compose:
+`gtfs-rt-metrics` is most easily deployed with [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/):
 
 1. Copy `config-sample.ini` to `config.ini` and edit as desired.  You may want to edit the list of feeds being monitored, change the polling interval, or alter the InfluxDB configuration parameters.
 2. Copy `docker-compose-sample.yml` to `docker-compose.yml`.  Edit as desired (although no changes are required for the default configuration).
