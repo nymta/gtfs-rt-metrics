@@ -1,4 +1,4 @@
-requests==2.20.0
+requests==2.31.0
 apscheduler==3.4.0
 gtfs-realtime-bindings==0.0.5
 influxdb==4.1.1
